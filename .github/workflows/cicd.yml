@@ -49,60 +49,34 @@ jobs:
       - name: CDK Deploy
         run: npx cdk deploy --require-approval never --all
 
-  notify-slack:
+  notify-slack-success:
     runs-on: ubuntu-latest
     needs: deploy-cdk
+    if: ${{ success() }}
     steps:
-      - name: Notify Slack on Success
-        if: ${{ success() }}
+      - name: Slack Notification - Success
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        with:
-          args: |
-            --message "✅ *CDK Deployment Succeeded* on branch *${{ github.ref_name }}* by *${{ github.actor }}*.
-            Details: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+          SLACK_COLOR: "good"
+          SLACK_TITLE: "✅ Deployment Succeeded"
+          SLACK_MESSAGE: |
+            The CDK deployment has succeeded for branch *${{ github.ref_name }}*.
+            *Committer:* ${{ github.actor }}
+            *Workflow Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>
 
-      - name: Notify Slack on Failure
-        if: ${{ failure() }}
+  notify-slack-failure:
+    runs-on: ubuntu-latest
+    needs: deploy-cdk
+    if: ${{ failure() }}
+    steps:
+      - name: Slack Notification - Failure
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        with:
-          args: |
-            --message "❌ *CDK Deployment Failed* on branch *${{ github.ref_name }}* by *${{ github.actor }}*.
-            Details: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
-
-      # # Slack通知（成功時）
-      # - name: Notify Slack on success
-      #   if: ${{ success() }}
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     payload: |
-      #       {
-      #         "text": "✅ GitHub Actions Workflow '{{ github.workflow }}' succeeded in repository '{{ github.repository }}' on branch '{{ github.ref_name }}'.",
-      #         "attachments": [
-      #           {
-      #             "text": "View details: {{ github.server_url }}/{{ github.repository }}/actions/runs/{{ github.run_id }}"
-      #           }
-      #         ]
-      #       }
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      # # Slack通知（失敗時）
-      # - name: Notify Slack on failure
-      #   if: ${{ failure() }}
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     payload: |
-      #       {
-      #         "text": "❌ GitHub Actions Workflow '{{ github.workflow }}' failed in repository '{{ github.repository }}' on branch '{{ github.ref_name }}'.",
-      #         "attachments": [
-      #           {
-      #             "text": "View details: {{ github.server_url }}/{{ github.repository }}/actions/runs/{{ github.run_id }}"
-      #           }
-      #         ]
-      #       }
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: "danger"
+          SLACK_TITLE: "❌ Deployment Failed"
+          SLACK_MESSAGE: |
+            The CDK deployment has failed for branch *${{ github.ref_name }}*.
+            *Committer:* ${{ github.actor }}
+            *Workflow Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>
