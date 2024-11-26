@@ -1,4 +1,4 @@
-name: "CI/CD for CDK"
+name: "GitHub Actions for CDK"
 
 on:
   push:
@@ -47,9 +47,7 @@ jobs:
         run: npx cdk diff
 
       - name: CDK Deploy
-        # run: npx cdk deploy --require-approval never --all
-        # わざと失敗させる
-        run: npx cdk deploy --require-approval always
+        run: npx cdk deploy --require-approval never --all
 
   notify-slack-success:
     runs-on: ubuntu-latest
