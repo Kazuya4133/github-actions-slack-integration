@@ -18,8 +18,6 @@ jobs:
   deploy-cdk:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      ENV_NAME: gf-dev
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
