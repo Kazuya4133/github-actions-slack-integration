@@ -59,12 +59,9 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          message: |
-            ✅ CDK Deployment Succeeded!
-            *Branch:* ${{ github.ref_name }}
-            *Workflow:* ${{ github.workflow }}
-            *Committer:* ${{ github.actor }}
-            *Run URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          args: |
+            --message "✅ *CDK Deployment Succeeded* on branch *${{ github.ref_name }}* by *${{ github.actor }}*.
+            Details: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
 
       - name: Notify Slack on Failure
         if: ${{ failure() }}
@@ -72,12 +69,9 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          message: |
-            ❌ CDK Deployment Failed!
-            *Branch:* ${{ github.ref_name }}
-            *Workflow:* ${{ github.workflow }}
-            *Committer:* ${{ github.actor }}
-            *Run URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          args: |
+            --message "❌ *CDK Deployment Failed* on branch *${{ github.ref_name }}* by *${{ github.actor }}*.
+            Details: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
 
       # # Slack通知（成功時）
       # - name: Notify Slack on success
