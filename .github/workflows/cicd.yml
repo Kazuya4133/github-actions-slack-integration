@@ -48,3 +48,37 @@ jobs:
 
       - name: CDK Deploy
         run: npx cdk deploy --require-approval never --all
+
+      # Slack通知（成功時）
+      - name: Notify Slack on success
+        if: ${{ success() }}
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          payload: |
+            {
+              "text": "✅ GitHub Actions Workflow '{{ github.workflow }}' succeeded in repository '{{ github.repository }}' on branch '{{ github.ref_name }}'.",
+              "attachments": [
+                {
+                  "text": "View details: {{ github.server_url }}/{{ github.repository }}/actions/runs/{{ github.run_id }}"
+                }
+              ]
+            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # Slack通知（失敗時）
+      - name: Notify Slack on failure
+        if: ${{ failure() }}
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          payload: |
+            {
+              "text": "❌ GitHub Actions Workflow '{{ github.workflow }}' failed in repository '{{ github.repository }}' on branch '{{ github.ref_name }}'.",
+              "attachments": [
+                {
+                  "text": "View details: {{ github.server_url }}/{{ github.repository }}/actions/runs/{{ github.run_id }}"
+                }
+              ]
+            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
