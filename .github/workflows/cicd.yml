@@ -1,0 +1,58 @@
+name: "CI/CD for CDK"
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-cdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENV_NAME: gf-dev
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ./infrastructure/package-lock.json
+
+      - name: Setup dependencies for CDK
+        run: npm ci
+        working-directory: ./infrastructure
+
+      - name: Bootstrap CDK
+        run: npx cdk bootstrap
+        working-directory: ./infrastructure
+
+      - name: Build CDK
+        run: npm run build
+        working-directory: ./infrastructure
+
+      - name: CDK Diff Check
+        run: npx cdk diff
+        working-directory: ./infrastructure
+
+      - name: CDK Deploy
+        run: npx cdk deploy --require-approval never --all
+        working-directory: ./infrastructure
