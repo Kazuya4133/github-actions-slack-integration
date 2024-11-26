@@ -47,7 +47,8 @@ jobs:
         run: npx cdk diff
 
       - name: CDK Deploy
-        run: npx cdk deploy --require-approval never --all
+        # run: npx cdk deploy --require-approval never --all
+        run: npx cdk deploy --require-approval always
 
   # notify-slack-success:
   #   runs-on: ubuntu-latest
